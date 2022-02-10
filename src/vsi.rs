@@ -1,4 +1,3 @@
-use std::ffi::CStr;
 use std::marker::PhantomData;
 use std::mem::ManuallyDrop;
 use std::path::{Path, PathBuf};
@@ -14,6 +13,7 @@ pub fn read_dir<P: AsRef<Path>>(path: P) -> Result<Vec<String>> {
     let mut files = Vec::new();
     unsafe {
         use gdal_sys::{CSLDestroy, VSIReadDir};
+        use std::ffi::CStr;
 
         // VSIReadDir returns a pointer to C string (null terminated) pointers. The list
         // of C string pointers is itself also terminated by a null pointer.
