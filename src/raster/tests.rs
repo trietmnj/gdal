@@ -699,11 +699,13 @@ fn test_vsi_read_dir() {
     use crate::vsi;
     use std::collections::HashSet;
 
+    // Concatenate "/vsizip/" prefix.
     let path = [
         "/vsizip/",
         fixture!("vsi_read_dir_test.zip").to_str().unwrap(),
     ]
     .concat();
+
     let expected = HashSet::from(["File 1.txt", "File 2.txt", "File 3.txt"]);
     let files = vsi::read_dir(&path).unwrap();
     for file in files {
