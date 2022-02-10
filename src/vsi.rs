@@ -20,17 +20,19 @@ pub fn read_dir<P: AsRef<Path>>(path: P) -> Result<Vec<String>> {
         let data = VSIReadDir(path.as_ptr());
 
         let mut index = data as usize;
-        loop {
-            let ptr = *(index as *mut *mut i8);
-            if ptr as usize == 0 {
-                break;
-            }
+        if index != 0 {
+            loop {
+                let ptr = *(index as *mut *mut i8);
+                if ptr as usize == 0 {
+                    break;
+                }
 
-            if let Ok(file) = CStr::from_ptr(ptr).as_ref().to_str() {
-                files.push(String::from(file));
-            }
+                if let Ok(file) = CStr::from_ptr(ptr).as_ref().to_str() {
+                    files.push(String::from(file));
+                }
 
-            index += std::mem::size_of::<*mut i8>();
+                index += std::mem::size_of::<*mut i8>();
+            }
         }
 
         CSLDestroy(data);
