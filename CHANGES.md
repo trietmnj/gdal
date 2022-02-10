@@ -12,6 +12,7 @@
   - <https://github.com/georust/gdal/pull/250>
 
 - Add `gdal::vsi::read_dir` function.
+  - <https://github.com/georust/gdal/pull/257>
 
 ## 0.12
 
