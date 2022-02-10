@@ -696,15 +696,22 @@ fn test_rasterize() {
 
 #[test]
 fn test_vsi_read_dir() {
+    use crate::vsi;
     use std::collections::HashSet;
+
     let path = [
         "/vsizip/",
         fixture!("vsi_read_dir_test.zip").to_str().unwrap(),
     ]
     .concat();
     let expected = HashSet::from(["File 1.txt", "File 2.txt", "File 3.txt"]);
-    let files = crate::vsi::read_dir(&path).unwrap();
+    let files = vsi::read_dir(&path).unwrap();
     for file in files {
         assert!(expected.contains(file.as_str()));
     }
+
+    // Attempting to read without VSI prefix returns empty vector.
+    assert!(vsi::read_dir(fixture!("vsi_read_dir_test.zip"))
+        .unwrap()
+        .is_empty());
 }
