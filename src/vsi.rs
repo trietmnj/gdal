@@ -3,10 +3,7 @@ use std::marker::PhantomData;
 use std::mem::ManuallyDrop;
 use std::path::{Path, PathBuf};
 
-use gdal_sys::{
-    CSLDestroy, VSIFCloseL, VSIFileFromMemBuffer, VSIFree, VSIGetMemFileBuffer, VSIReadDir,
-    VSIUnlink,
-};
+use gdal_sys::{VSIFCloseL, VSIFileFromMemBuffer, VSIFree, VSIGetMemFileBuffer, VSIUnlink};
 
 use crate::errors::{GdalError, Result};
 use crate::utils::{_last_null_pointer_err, _path_to_c_string};
@@ -16,6 +13,8 @@ pub fn read_dir<P: AsRef<Path>>(path: P) -> Result<Vec<String>> {
     let path = _path_to_c_string(path.as_ref())?;
     let mut files = Vec::new();
     unsafe {
+        use gdal_sys::{CSLDestroy, VSIReadDir};
+
         // VSIReadDir returns a pointer to C string (null terminated) pointers. The list
         // of C string pointers is itself also terminated by a null pointer.
         let data = VSIReadDir(path.as_ptr());
