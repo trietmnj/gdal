@@ -33,9 +33,8 @@ pub fn read_dir<P: AsRef<Path>>(path: P) -> Result<Vec<String>> {
 
                 index += std::mem::size_of::<*mut i8>();
             }
+            CSLDestroy(data);
         }
-
-        CSLDestroy(data);
     }
     Ok(files)
 }
