@@ -7,17 +7,18 @@ use gdal_sys::{VSIFCloseL, VSIFileFromMemBuffer, VSIFree, VSIGetMemFileBuffer, V
 use crate::errors::{GdalError, Result};
 use crate::utils::{_last_null_pointer_err, _path_to_c_string};
 
-/// Read the file names from a virtual file system.
-pub fn read_dir<P: AsRef<Path>>(path: P) -> Result<Vec<String>> {
+/// Read the file names from a virtual file system with optional recursion.
+pub fn read_dir<P: AsRef<Path>>(path: P, recursive: bool) -> Result<Vec<String>> {
     let path = _path_to_c_string(path.as_ref())?;
     let mut files = Vec::new();
     unsafe {
-        use gdal_sys::{CSLDestroy, VSIReadDir};
-        use std::ffi::CStr;
-
         // VSIReadDir returns a pointer to C string (null terminated) pointers. The list
         // of C string pointers is itself also terminated by a null pointer.
-        let data = VSIReadDir(path.as_ptr());
+        let data = if recursive {
+            gdal_sys::VSIReadDirRecursive(path.as_ptr())
+        } else {
+            gdal_sys::VSIReadDir(path.as_ptr())
+        };
 
         let mut index = data as usize;
         if index != 0 {
@@ -27,13 +28,13 @@ pub fn read_dir<P: AsRef<Path>>(path: P) -> Result<Vec<String>> {
                     break;
                 }
 
-                if let Ok(file) = CStr::from_ptr(ptr).as_ref().to_str() {
+                if let Ok(file) = std::ffi::CStr::from_ptr(ptr).as_ref().to_str() {
                     files.push(String::from(file));
                 }
 
                 index += std::mem::size_of::<*mut i8>();
             }
-            CSLDestroy(data);
+            gdal_sys::CSLDestroy(data);
         }
     }
     Ok(files)

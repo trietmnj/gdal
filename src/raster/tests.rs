@@ -702,18 +702,32 @@ fn test_vsi_read_dir() {
     // Concatenate "/vsizip/" prefix.
     let path = [
         "/vsizip/",
-        fixture!("vsi_read_dir_test.zip").to_str().unwrap(),
+        fixture!("test_vsi_read_dir.zip").to_str().unwrap(),
     ]
     .concat();
 
-    let expected = HashSet::from(["File 1.txt", "File 2.txt", "File 3.txt"]);
-    let files = vsi::read_dir(&path).unwrap();
+    // Read without recursion.
+    let expected = HashSet::from(["folder", "File 1.txt", "File 2.txt", "File 3.txt"]);
+    let files = vsi::read_dir(path.as_str(), false).unwrap();
+    for file in files {
+        assert!(expected.contains(file.as_str()));
+    }
+
+    // Read with recursion.
+    let expected = HashSet::from([
+        "folder/",
+        "folder/File 4.txt",
+        "File 1.txt",
+        "File 2.txt",
+        "File 3.txt",
+    ]);
+    let files = vsi::read_dir(path.as_str(), true).unwrap();
     for file in files {
         assert!(expected.contains(file.as_str()));
     }
 
     // Attempting to read without VSI prefix returns empty vector.
-    assert!(vsi::read_dir(fixture!("vsi_read_dir_test.zip"))
+    assert!(vsi::read_dir(fixture!("test_vsi_read_dir.zip"), false)
         .unwrap()
         .is_empty());
 }
