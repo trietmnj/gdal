@@ -8,41 +8,16 @@ use crate::errors::{GdalError, Result};
 use crate::utils::{_last_null_pointer_err, _path_to_c_string};
 
 /// Read the file names from a virtual file system with optional recursion.
-pub fn read_dir<P: AsRef<Path>>(path: P, recursive: bool) -> Result<Vec<PathBuf>> {
+pub fn read_dir<P: AsRef<Path>>(path: P, recursive: bool) -> Result<Vec<String>> {
     let path = _path_to_c_string(path.as_ref())?;
-    let mut files = Vec::new();
-    unsafe {
-        // VSIReadDir returns a pointer to C string (null terminated) pointers. The list
-        // of C string pointers is itself also terminated by a null pointer.
-        let data = if recursive {
+    let data = unsafe {
+        if recursive {
             gdal_sys::VSIReadDirRecursive(path.as_ptr())
         } else {
             gdal_sys::VSIReadDir(path.as_ptr())
-        };
-
-        if !data.is_null() {
-            let mut index = 0;
-            loop {
-                let ptr = data.add(index).read();
-                if ptr.is_null() {
-                    break;
-                }
-
-                match std::ffi::CStr::from_ptr(ptr)
-                    .as_ref()
-                    .to_str()
-                    .map_err(Into::into)
-                {
-                    Ok(file) => files.push(PathBuf::from(file)),
-                    Err(err) => return Err(err),
-                }
-
-                index += 1;
-            }
-            gdal_sys::CSLDestroy(data);
         }
-    }
-    Ok(files)
+    };
+    Ok(crate::utils::_string_array(data))
 }
 
 /// Creates a new VSIMemFile from a given buffer.
