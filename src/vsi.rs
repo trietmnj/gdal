@@ -20,19 +20,24 @@ pub fn read_dir<P: AsRef<Path>>(path: P, recursive: bool) -> Result<Vec<String>>
             gdal_sys::VSIReadDir(path.as_ptr())
         };
 
-        let mut index = data as usize;
-        if index != 0 {
+        if !data.is_null() {
+            let mut index = 0;
             loop {
-                let ptr = *(index as *mut *mut i8);
-                if ptr as usize == 0 {
+                let ptr = data.add(index).read();
+                if ptr.is_null() {
                     break;
                 }
 
-                if let Ok(file) = std::ffi::CStr::from_ptr(ptr).as_ref().to_str() {
-                    files.push(String::from(file));
+                match std::ffi::CStr::from_ptr(ptr)
+                    .as_ref()
+                    .to_str()
+                    .map_err(Into::into)
+                {
+                    Ok(file) => files.push(String::from(file)),
+                    Err(err) => return Err(err),
                 }
 
-                index += std::mem::size_of::<*mut i8>();
+                index += 1;
             }
             gdal_sys::CSLDestroy(data);
         }
