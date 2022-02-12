@@ -710,7 +710,7 @@ fn test_vsi_read_dir() {
     let expected = HashSet::from(["folder", "File 1.txt", "File 2.txt", "File 3.txt"]);
     let files = vsi::read_dir(path.as_str(), false).unwrap();
     for file in files {
-        assert!(expected.contains(file.as_str()));
+        assert!(expected.contains(file.to_str().unwrap()));
     }
 
     // Read with recursion.
@@ -723,7 +723,7 @@ fn test_vsi_read_dir() {
     ]);
     let files = vsi::read_dir(path.as_str(), true).unwrap();
     for file in files {
-        assert!(expected.contains(file.as_str()));
+        assert!(expected.contains(file.to_str().unwrap()));
     }
 
     // Attempting to read without VSI prefix returns empty vector.

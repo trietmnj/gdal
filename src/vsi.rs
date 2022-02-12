@@ -8,7 +8,7 @@ use crate::errors::{GdalError, Result};
 use crate::utils::{_last_null_pointer_err, _path_to_c_string};
 
 /// Read the file names from a virtual file system with optional recursion.
-pub fn read_dir<P: AsRef<Path>>(path: P, recursive: bool) -> Result<Vec<String>> {
+pub fn read_dir<P: AsRef<Path>>(path: P, recursive: bool) -> Result<Vec<PathBuf>> {
     let path = _path_to_c_string(path.as_ref())?;
     let mut files = Vec::new();
     unsafe {
@@ -33,7 +33,7 @@ pub fn read_dir<P: AsRef<Path>>(path: P, recursive: bool) -> Result<Vec<String>>
                     .to_str()
                     .map_err(Into::into)
                 {
-                    Ok(file) => files.push(String::from(file)),
+                    Ok(file) => files.push(PathBuf::from(file)),
                     Err(err) => return Err(err),
                 }
 
