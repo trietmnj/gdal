@@ -697,7 +697,6 @@ fn test_rasterize() {
 #[test]
 fn test_vsi_read_dir() {
     use crate::vsi;
-    use std::collections::HashSet;
 
     // Concatenate "/vsizip/" prefix.
     let path = [
@@ -707,24 +706,20 @@ fn test_vsi_read_dir() {
     .concat();
 
     // Read without recursion.
-    let expected = HashSet::from(["folder", "File 1.txt", "File 2.txt", "File 3.txt"]);
+    let expected = ["folder", "File 1.txt", "File 2.txt", "File 3.txt"];
     let files = vsi::read_dir(path.as_str(), false).unwrap();
-    for file in files {
-        assert!(expected.contains(file.as_str()));
-    }
+    assert_eq!(files, expected);
 
     // Read with recursion.
-    let expected = HashSet::from([
+    let expected = [
         "folder/",
         "folder/File 4.txt",
         "File 1.txt",
         "File 2.txt",
         "File 3.txt",
-    ]);
+    ];
     let files = vsi::read_dir(path.as_str(), true).unwrap();
-    for file in files {
-        assert!(expected.contains(file.as_str()));
-    }
+    assert_eq!(files, expected);
 
     // Attempting to read without VSI prefix returns empty vector.
     assert!(vsi::read_dir(fixture!("test_vsi_read_dir.zip"), false)
