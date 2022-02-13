@@ -721,8 +721,6 @@ fn test_vsi_read_dir() {
     let files = vsi::read_dir(path.as_str(), true).unwrap();
     assert_eq!(files, expected);
 
-    // Attempting to read without VSI prefix returns empty vector.
-    assert!(vsi::read_dir(fixture!("test_vsi_read_dir.zip"), false)
-        .unwrap()
-        .is_empty());
+    // Attempting to read without VSI prefix returns error.
+    assert!(vsi::read_dir(fixture!("test_vsi_read_dir.zip"), false).is_err());
 }

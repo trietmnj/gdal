@@ -12,9 +12,23 @@ pub fn read_dir<P: AsRef<Path>>(path: P, recursive: bool) -> Result<Vec<String>>
     let path = _path_to_c_string(path.as_ref())?;
     let data = unsafe {
         if recursive {
-            gdal_sys::VSIReadDirRecursive(path.as_ptr())
+            let data = gdal_sys::VSIReadDirRecursive(path.as_ptr());
+            if data.is_null() {
+                return Err(GdalError::NullPointer {
+                    method_name: "VSIReadDirRecursive",
+                    msg: String::from("returned null pointer"),
+                });
+            }
+            data
         } else {
-            gdal_sys::VSIReadDir(path.as_ptr())
+            let data = gdal_sys::VSIReadDir(path.as_ptr());
+            if data.is_null() {
+                return Err(GdalError::NullPointer {
+                    method_name: "VSIReadDir",
+                    msg: String::from("returned null pointer"),
+                });
+            }
+            data
         }
     };
     Ok(crate::utils::_string_array(data))
