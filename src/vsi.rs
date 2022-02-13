@@ -5,7 +5,7 @@ use std::path::{Path, PathBuf};
 use gdal_sys::{VSIFCloseL, VSIFileFromMemBuffer, VSIFree, VSIGetMemFileBuffer, VSIUnlink};
 
 use crate::errors::{GdalError, Result};
-use crate::utils::{_last_null_pointer_err, _path_to_c_string};
+use crate::utils::{_last_null_pointer_err, _path_to_c_string, _string_array};
 
 /// Read the file names from a virtual file system with optional recursion.
 pub fn read_dir<P: AsRef<Path>>(path: P, recursive: bool) -> Result<Vec<String>> {
@@ -14,24 +14,19 @@ pub fn read_dir<P: AsRef<Path>>(path: P, recursive: bool) -> Result<Vec<String>>
         if recursive {
             let data = gdal_sys::VSIReadDirRecursive(path.as_ptr());
             if data.is_null() {
-                return Err(GdalError::NullPointer {
-                    method_name: "VSIReadDirRecursive",
-                    msg: String::from("returned null pointer"),
-                });
+                return Err(_last_null_pointer_err("VSIReadDirRecursive"));
             }
             data
         } else {
             let data = gdal_sys::VSIReadDir(path.as_ptr());
             if data.is_null() {
-                return Err(GdalError::NullPointer {
-                    method_name: "VSIReadDir",
-                    msg: String::from("returned null pointer"),
-                });
+                return Err(_last_null_pointer_err("VSIReadDir"));
             }
             data
         }
     };
-    Ok(crate::utils::_string_array(data))
+
+    Ok(_string_array(data))
 }
 
 /// Creates a new VSIMemFile from a given buffer.
