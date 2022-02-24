@@ -693,34 +693,3 @@ fn test_rasterize() {
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0,]
     );
 }
-
-#[test]
-fn test_vsi_read_dir() {
-    use crate::vsi;
-
-    // Concatenate "/vsizip/" prefix.
-    let path = [
-        "/vsizip/",
-        fixture!("test_vsi_read_dir.zip").to_str().unwrap(),
-    ]
-    .concat();
-
-    // Read without recursion.
-    let expected = ["folder", "File 1.txt", "File 2.txt", "File 3.txt"];
-    let files = vsi::read_dir(path.as_str(), false).unwrap();
-    assert_eq!(files, expected);
-
-    // Read with recursion.
-    let expected = [
-        "folder/",
-        "folder/File 4.txt",
-        "File 1.txt",
-        "File 2.txt",
-        "File 3.txt",
-    ];
-    let files = vsi::read_dir(path.as_str(), true).unwrap();
-    assert_eq!(files, expected);
-
-    // Attempting to read without VSI prefix returns error.
-    assert!(vsi::read_dir(fixture!("test_vsi_read_dir.zip"), false).is_err());
-}

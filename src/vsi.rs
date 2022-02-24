@@ -299,4 +299,38 @@ mod tests {
             })
         );
     }
+
+    #[test]
+    fn test_vsi_read_dir() {
+        use std::path::Path;
+        let zip_path = Path::new(file!())
+            .parent()
+            .unwrap()
+            .parent()
+            .unwrap()
+            .join("fixtures")
+            .join("test_vsi_read_dir.zip");
+
+        // Concatenate "/vsizip/" prefix.
+        let path = ["/vsizip/", zip_path.to_str().unwrap()].concat();
+
+        // Read without recursion.
+        let expected = ["folder", "File 1.txt", "File 2.txt", "File 3.txt"];
+        let files = read_dir(path.as_str(), false).unwrap();
+        assert_eq!(files, expected);
+
+        // Read with recursion.
+        let expected = [
+            "folder/",
+            "folder/File 4.txt",
+            "File 1.txt",
+            "File 2.txt",
+            "File 3.txt",
+        ];
+        let files = read_dir(path.as_str(), true).unwrap();
+        assert_eq!(files, expected);
+
+        // Attempting to read without VSI prefix returns error.
+        assert!(read_dir(zip_path, false).is_err());
+    }
 }
