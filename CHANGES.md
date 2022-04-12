@@ -15,6 +15,9 @@
 
   - https://github.com/georust/gdal/pull/238
 
+- Add `gdal::vsi::read_dir` function.
+  - <https://github.com/georust/gdal/pull/257>
+
 ## 0.12
 
 - Bump Rust edition to 2021
