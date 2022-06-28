@@ -25,7 +25,7 @@ pub use version::version_info;
 
 pub mod config;
 pub mod cpl;
-mod dataset;
+pub mod dataset;
 mod driver;
 pub mod errors;
 mod gdal_major_object;
