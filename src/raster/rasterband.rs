@@ -121,6 +121,8 @@ pub struct RasterBand<'a> {
     dataset: &'a Dataset,
 }
 
+unsafe impl<'a> Send for RasterBand<'a> {}
+
 impl<'a> RasterBand<'a> {
     /// Create a RasterBand from a wrapped C pointer
     ///
